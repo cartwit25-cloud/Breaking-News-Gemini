@@ -1,0 +1,237 @@
+
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Breaking News</title>
+    <style>
+        :root {
+            --bg-color: #f8f9fa;
+            --card-bg: #ffffff;
+            --high-impact: #FF4D4D;
+            --mid-impact: #FFB84D;
+            --low-impact: #E0E0E0;
+            --text-main: #2c3e50;
+            --text-sub: #5f6368;
+            --accent: #007bff;
+        }
+
+        body {
+            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+        }
+
+        header {
+            max-width: 1000px;
+            margin: 0 auto 30px;
+            text-align: center;
+        }
+
+        h1 { font-size: 2.5rem; margin-bottom: 10px; color: #1a1a1a; }
+
+        .meta-info {
+            font-size: 0.9rem;
+            color: var(--text-sub);
+            margin-bottom: 20px;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: transform 0.1s, opacity 0.2s;
+        }
+
+        .btn-quick { background-color: #e3f2fd; color: #1976d2; }
+        .btn-full { background-color: #34a853; color: white; }
+        .btn-reload { background-color: #f1f3f4; color: #3c4043; }
+
+        button:active { transform: scale(0.95); }
+        button:hover { opacity: 0.8; }
+
+        /* Top 3 Section */
+        .top-section {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto 40px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border: 1px solid #eee;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow 0.3s;
+        }
+
+        .card:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+
+        .card.top-card { border-top: 6px solid var(--high-impact); }
+
+        .impact-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+            width: fit-content;
+        }
+
+        .high { background: var(--high-impact); color: white; }
+        .mid { background: var(--mid-impact); color: white; }
+        .low { background: var(--low-impact); color: #666; }
+
+        .title { font-size: 1.25rem; font-weight: bold; margin-bottom: 12px; line-height: 1.4; }
+        .summary { font-size: 0.95rem; color: var(--text-sub); line-height: 1.6; margin-bottom: 15px; }
+        .why-it-matters {
+            background: #fff9e6;
+            padding: 10px;
+            border-left: 4px solid #fbbc04;
+            font-style: italic;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+
+        .card-footer {
+            margin-top: auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            color: #9aa0a6;
+        }
+
+        .source-btn {
+            background: #f8f9fa;
+            border: 1px solid #dadce0;
+            padding: 5px 12px;
+            border-radius: 6px;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            white-space: nowrap;
+            cursor: pointer;
+            border-radius: 20px;
+            background: white;
+            border: 1px solid #ddd;
+        }
+
+        .tab.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 600px) {
+            h1 { font-size: 1.8rem; }
+            .controls { flex-wrap: wrap; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>Breaking News</h1>
+    <div class="meta-info" id="timeInfo">
+        最後同步：正在讀取... | 最後更新：正在讀取...
+    </div>
+    <div class="controls">
+        <button class="btn-reload" onclick="refreshData('Reload')">Refresh (Cache)</button>
+        <button class="btn-quick" onclick="refreshData('Quick')">Quick Refresh (+5)</button>
+        <button class="btn-full" onclick="refreshData('Full')">Full Refresh (Top 20)</button>
+    </div>
+</header>
+
+<div class="tabs" id="categoryTabs">
+    <div class="tab active" onclick="filterCategory('All')">🔥 熱門</div>
+    <div class="tab" onclick="filterCategory('Geo')">🌍 Geo</div>
+    <div class="tab" onclick="filterCategory('Economy')">💰 Economy</div>
+    <div class="tab" onclick="filterCategory('Conflict')">⚔️ Conflict</div>
+    <div class="tab" onclick="filterCategory('Tech')">🧠 Tech</div>
+</div>
+
+<div class="news-grid" id="newsContainer">
+    <!-- News Cards will be injected here -->
+</div>
+
+<script>
+    const SCRIPT_URL = 'YOUR_GOOGLE_SCRIPT_WEB_APP_URL';
+
+    async function refreshData(mode) {
+        document.getElementById('newsContainer').innerHTML = '<p style="text-align:center; width:100%;">同步中，請稍候...</p>';
+        
+        try {
+            const response = await fetch(`${SCRIPT_URL}?mode=${mode}`);
+            const data = await response.json();
+            renderNews(data.news);
+            document.getElementById('timeInfo').innerText = `最後同步：${data.lastSync} | 最後更新：${data.lastUpdate}`;
+        } catch (e) {
+            console.error(e);
+            alert('無法獲取資料，請確認 Web App URL 是否正確並已發佈為「任何人」。');
+        }
+    }
+
+    function renderNews(newsList) {
+        const container = document.getElementById('newsContainer');
+        container.innerHTML = '';
+
+        newsList.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card';
+            const impactClass = item.impact === '高' ? 'high' : (item.impact === '中' ? 'mid' : 'low');
+            
+            card.innerHTML = `
+                <span class="impact-badge ${impactClass}">${item.impact}影響</span>
+                <div class="title">${item.title}</div>
+                <div class="summary">${item.summary}</div>
+                <div class="why-it-matters"><strong>Why it matters:</strong> ${item.whyMatters}</div>
+                <div class="card-footer">
+                    <span>${item.source} • ${item.time}</span>
+                    <a href="${item.url}" target="_blank" class="source-btn">Source</a>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // Initial load
+    window.onload = () => refreshData('Reload');
+</script>
+</body>
+</html>
