@@ -1,237 +1,633 @@
-
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Breaking News</title>
-    <style>
-        :root {
-            --bg-color: #f8f9fa;
-            --card-bg: #ffffff;
-            --high-impact: #FF4D4D;
-            --mid-impact: #FFB84D;
-            --low-impact: #E0E0E0;
-            --text-main: #2c3e50;
-            --text-sub: #5f6368;
-            --accent: #007bff;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Breaking News</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#E8342A;--red-l:#FFF0EF;--red-m:#FFDAD7;
+  --amber:#F59E0B;--amber-l:#FFFBEB;--amber-m:#FEF3C7;
+  --blue:#3B82F6;--blue-l:#EFF6FF;--blue-m:#DBEAFE;
+  --purple:#8B5CF6;--purple-l:#F5F3FF;--purple-m:#EDE9FE;
+  --green:#10B981;--green-l:#ECFDF5;--green-m:#D1FAE5;
+  --orange:#F97316;--orange-l:#FFF7ED;--orange-m:#FFEDD5;
+  --slate:#64748B;--slate-m:#E2E8F0;--slate-l:#F8FAFC;
+  --ink:#0F172A;--muted:#475569;--hint:#94A3B8;
+  --bg:#F0F4F8;--card:#FFFFFF;--border:#E2E8F0;
+  --r:16px;--rs:10px;
+  --s0:0 1px 3px rgba(0,0,0,.06),0 1px 2px rgba(0,0,0,.04);
+  --s1:0 4px 16px rgba(0,0,0,.09),0 2px 6px rgba(0,0,0,.05);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--ink);min-height:100vh}
 
-        body {
-            font-family: 'PingFang TC', 'Microsoft JhengHei', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-        }
+/* BOOT */
+#boot{position:fixed;inset:0;background:var(--ink);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:32px;transition:opacity .5s}
+#boot.out{opacity:0;pointer-events:none}
+.b-logo{font-family:'Syne',sans-serif;font-size:36px;font-weight:800;color:#fff;letter-spacing:-1.5px;display:flex;align-items:center;gap:10px}
+.b-logo-dot{width:10px;height:10px;background:var(--red);border-radius:50%;animation:pdot 1.4s ease-in-out infinite}
+@keyframes pdot{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.5}}
+.b-logo em{color:var(--red);font-style:normal}
+.b-wrap{width:280px}
+.b-track{height:2px;background:rgba(255,255,255,.1);border-radius:1px;overflow:hidden;margin-bottom:12px}
+.b-fill{height:100%;background:var(--red);width:0%;transition:width .4s ease}
+.b-msg{font-size:13px;color:#64748B;text-align:center;height:20px}
+.b-steps{display:flex;gap:24px}
+.b-step{display:flex;align-items:center;gap:6px;font-size:12px;color:#334155;transition:color .3s}
+.b-step.on{color:#94A3B8}.b-step.ok{color:#34D399}
+.b-step-ico{font-size:14px;width:16px;text-align:center}
 
-        header {
-            max-width: 1000px;
-            margin: 0 auto 30px;
-            text-align: center;
-        }
+/* HEADER */
+.hdr{background:var(--ink);position:sticky;top:0;z-index:200;border-bottom:1px solid rgba(255,255,255,.05)}
+.hdr-in{max-width:1260px;margin:0 auto;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{display:flex;align-items:center;gap:9px;text-decoration:none}
+.logo-dot{width:8px;height:8px;background:var(--red);border-radius:50%;animation:pdot 1.6s ease-in-out infinite}
+.logo-txt{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:#fff;letter-spacing:-.5px}
+.logo-txt em{color:var(--red);font-style:normal}
+.hdr-mid{display:flex;align-items:center;gap:12px}
+.mpill{display:flex;align-items:center;gap:6px;padding:5px 12px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:20px;font-size:11px;color:#94A3B8;white-space:nowrap}
+.mpill strong{color:#CBD5E1;font-weight:500}
+.hdr-btns{display:flex;align-items:center;gap:7px}
+.vdiv{width:1px;height:22px;background:rgba(255,255,255,.1)}
 
-        h1 { font-size: 2.5rem; margin-bottom: 10px; color: #1a1a1a; }
+/* ICON BUTTONS */
+.ibtn{display:inline-flex;align-items:center;gap:7px;padding:7px 15px;border-radius:9px;border:1px solid;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:background .2s,border-color .2s,opacity .2s;white-space:nowrap}
+.ibtn:disabled{opacity:.35;cursor:not-allowed}
+.ibtn svg{width:16px;height:16px;flex-shrink:0}
+.ibtn-reload{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.14);color:#CBD5E1}
+.ibtn-reload:hover:not(:disabled){background:rgba(255,255,255,.12)}
+.ibtn-quick{background:rgba(20,184,166,.08);border-color:rgba(20,184,166,.3);color:#5EEAD4}
+.ibtn-quick:hover:not(:disabled){background:rgba(20,184,166,.14)}
+.ibtn-full{background:rgba(139,92,246,.08);border-color:rgba(139,92,246,.3);color:#C4B5FD}
+.ibtn-full:hover:not(:disabled){background:rgba(139,92,246,.14)}
+.ibtn-gear{background:rgba(255,255,255,.04);border-color:rgba(255,255,255,.1);color:#64748B;padding:7px 10px}
+.ibtn-gear:hover:not(:disabled){background:rgba(255,255,255,.1);color:#94A3B8}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinning{animation:spin .7s linear infinite}
 
-        .meta-info {
-            font-size: 0.9rem;
-            color: var(--text-sub);
-            margin-bottom: 20px;
-        }
+/* MAIN */
+.main{max-width:1260px;margin:0 auto;padding:28px 24px}
 
-        .controls {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
+/* TRENDING BAR */
+.tbar{display:flex;align-items:center;gap:8px;margin-bottom:28px;flex-wrap:wrap}
+.tbar-lbl{font-size:10.5px;font-weight:600;color:var(--hint);letter-spacing:.1em;text-transform:uppercase;margin-right:2px;white-space:nowrap}
+.ttag{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;transition:transform .15s,box-shadow .15s;border:1px solid transparent;white-space:nowrap;user-select:none}
+.ttag:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.1)}
+.ttag.active{outline:2px solid var(--ink);outline-offset:1px}
+.c-r{background:var(--red-l);color:var(--red);border-color:var(--red-m)}
+.c-a{background:var(--amber-l);color:#B45309;border-color:var(--amber-m)}
+.c-b{background:var(--blue-l);color:#1D4ED8;border-color:var(--blue-m)}
+.c-p{background:var(--purple-l);color:var(--purple);border-color:var(--purple-m)}
+.c-g{background:var(--green-l);color:#059669;border-color:var(--green-m)}
+.c-o{background:var(--orange-l);color:var(--orange);border-color:var(--orange-m)}
 
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: transform 0.1s, opacity 0.2s;
-        }
+/* SECTION LABEL */
+.slbl{font-family:'Syne',sans-serif;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--hint);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.slbl::after{content:'';flex:1;height:1px;background:var(--border)}
 
-        .btn-quick { background-color: #e3f2fd; color: #1976d2; }
-        .btn-full { background-color: #34a853; color: white; }
-        .btn-reload { background-color: #f1f3f4; color: #3c4043; }
+/* TOP3 */
+.t3{display:grid;grid-template-columns:1.55fr 1fr;grid-template-rows:auto auto;gap:14px;margin-bottom:36px}
+.t3>:first-child{grid-row:1/3}
 
-        button:active { transform: scale(0.95); }
-        button:hover { opacity: 0.8; }
+/* CARD */
+.card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);padding:18px 20px;box-shadow:var(--s0);transition:transform .2s,box-shadow .2s;animation:fu .35s ease both}
+@keyframes fu{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.card:hover{transform:translateY(-2px);box-shadow:var(--s1)}
+.card.hero{padding:24px 26px;border-left:4px solid var(--red)}
+.card.hero .ctit{font-size:17px;line-height:1.4}
+.card.hero .csum{font-size:14px}
+.chdr{display:flex;align-items:flex-start;gap:10px;margin-bottom:11px}
+.ctit{font-size:14px;font-weight:600;line-height:1.5;color:var(--ink);flex:1;letter-spacing:-.01em}
+.ibadge{display:inline-flex;align-items:center;gap:3px;padding:3px 9px;border-radius:6px;font-size:10.5px;font-weight:600;white-space:nowrap;flex-shrink:0}
+.i-hi{background:var(--red-l);color:var(--red)}
+.i-md{background:var(--amber-l);color:#B45309}
+.i-lo{background:var(--slate-m);color:var(--slate)}
+.csum{font-size:13px;line-height:1.72;color:var(--muted);margin-bottom:11px}
+.cwhy{background:var(--blue-l);border-left:3px solid var(--blue);padding:8px 12px;border-radius:0 8px 8px 0;margin-bottom:13px}
+.cwhy-lbl{font-size:9.5px;font-weight:700;color:var(--blue);text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px}
+.cwhy-txt{font-size:12.5px;color:#1E40AF;line-height:1.55;font-style:italic}
+.cftr{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.cmeta{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.src-tag{font-size:11px;font-weight:600;color:var(--hint);background:var(--slate-m);padding:2px 8px;border-radius:5px}
+.cat-tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:5px;text-transform:uppercase;letter-spacing:.04em}
+.pub-t{font-size:11px;color:var(--hint)}
+.src-btn{display:inline-flex;align-items:center;gap:5px;padding:5px 13px;background:var(--ink);color:#fff;border-radius:7px;font-size:12px;font-weight:500;text-decoration:none;transition:opacity .15s}
+.src-btn:hover{opacity:.72}
+.src-btn svg{width:11px;height:11px;opacity:.7}
 
-        /* Top 3 Section */
-        .top-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            max-width: 1200px;
-            margin: 0 auto 40px;
-        }
+/* TABS */
+.tbwrap{margin-bottom:20px}
+.tabs{display:flex;gap:4px;background:var(--card);border:1px solid var(--border);border-radius:var(--rs);padding:4px;overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:7px;font-size:13px;font-weight:500;color:var(--muted);border:none;background:transparent;cursor:pointer;white-space:nowrap;transition:all .18s}
+.tab:hover{color:var(--ink);background:var(--slate-m)}
+.tab.on{background:var(--ink);color:#fff}
+.tcnt{font-size:11px;background:rgba(0,0,0,.07);padding:1px 6px;border-radius:10px}
+.tab.on .tcnt{background:rgba(255,255,255,.18)}
 
-        .card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-            border: 1px solid #eee;
-            position: relative;
-            display: flex;
-            flex-direction: column;
-            transition: box-shadow 0.3s;
-        }
+/* LAYOUT */
+.lay{display:grid;grid-template-columns:1fr 272px;gap:22px;align-items:start}
+.ngrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(308px,1fr));gap:13px}
 
-        .card:hover { box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+/* SIDEBAR */
+.side{position:sticky;top:68px;display:flex;flex-direction:column;gap:14px}
+.sc{background:var(--card);border-radius:var(--r);border:1px solid var(--border);padding:18px 20px;box-shadow:var(--s0)}
+.sc-tit{font-family:'Syne',sans-serif;font-size:13px;font-weight:700;color:var(--ink);margin-bottom:14px}
+.tri{display:flex;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.tri:last-child{border:none;padding-bottom:0}
+.tri-ico{font-size:15px;flex-shrink:0;margin-top:1px}
+.tri-body{font-size:12.5px;color:var(--muted);line-height:1.55}
+.tri-body strong{color:var(--ink);font-weight:500;display:block;margin-bottom:2px;font-size:13px}
+.tcloud{display:flex;flex-wrap:wrap;gap:6px}
+.tpill{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;transition:transform .12s}
+.tpill:hover{transform:translateY(-1px)}
 
-        .card.top-card { border-top: 6px solid var(--high-impact); }
+/* SKELETON */
+.sk-card{background:var(--card);border-radius:var(--r);border:1px solid var(--border);padding:20px}
+.sk{background:linear-gradient(90deg,#EEF2F7 25%,#E4EAF2 50%,#EEF2F7 75%);background-size:200% 100%;animation:shim 1.5s infinite;border-radius:6px}
+@keyframes shim{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.sk-h1{height:17px;width:88%;margin-bottom:8px}
+.sk-h2{height:17px;width:62%;margin-bottom:14px}
+.sk-l{height:13px;width:100%;margin-bottom:6px}
+.sk-ls{height:13px;width:72%;margin-bottom:16px}
+.sk-b{height:26px;width:90px;border-radius:7px}
 
-        .impact-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            margin-bottom: 12px;
-            width: fit-content;
-        }
+/* STATUS / EMPTY */
+.state-box{text-align:center;padding:56px 20px;grid-column:1/-1}
+.state-box .ico{font-size:38px;margin-bottom:12px}
+.state-box h3{font-family:'Syne',sans-serif;font-size:17px;font-weight:700;margin-bottom:6px}
+.state-box p{font-size:14px;color:var(--muted);margin-bottom:16px}
+.state-btn{display:inline-flex;align-items:center;gap:7px;padding:10px 22px;background:var(--ink);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:opacity .15s}
+.state-btn:hover{opacity:.8}
 
-        .high { background: var(--high-impact); color: white; }
-        .mid { background: var(--mid-impact); color: white; }
-        .low { background: var(--low-impact); color: #666; }
+/* SYNC BANNER */
+.sync-banner{display:none;align-items:center;gap:10px;padding:10px 16px;background:var(--green-l);border:1px solid var(--green-m);border-radius:10px;margin-bottom:22px;font-size:13px;color:#065F46;animation:fu .3s ease}
+.sync-banner.show{display:flex}
 
-        .title { font-size: 1.25rem; font-weight: bold; margin-bottom: 12px; line-height: 1.4; }
-        .summary { font-size: 0.95rem; color: var(--text-sub); line-height: 1.6; margin-bottom: 15px; }
-        .why-it-matters {
-            background: #fff9e6;
-            padding: 10px;
-            border-left: 4px solid #fbbc04;
-            font-style: italic;
-            font-size: 0.9rem;
-            margin-bottom: 15px;
-        }
+/* TOAST */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;padding:11px 22px;border-radius:30px;font-size:13px;font-weight:500;z-index:1000;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .35s;opacity:0;white-space:nowrap;box-shadow:0 8px 28px rgba(0,0,0,.25)}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 
-        .card-footer {
-            margin-top: auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 0.8rem;
-            color: #9aa0a6;
-        }
+/* SETUP MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(15,23,42,.72);z-index:800;align-items:center;justify-content:center;padding:20px}
+.modal-bg.open{display:flex}
+.modal{background:var(--card);border-radius:20px;padding:32px;max-width:500px;width:100%;box-shadow:0 24px 64px rgba(0,0,0,.28)}
+.modal h2{font-family:'Syne',sans-serif;font-size:20px;font-weight:800;margin-bottom:6px}
+.modal-sub{font-size:14px;color:var(--muted);margin-bottom:24px;line-height:1.65}
+.mfield{margin-bottom:16px}
+.mfield label{display:block;font-size:11.5px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px}
+.mfield input{width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:border-color .2s}
+.mfield input:focus{border-color:var(--blue)}
+.mactions{display:flex;gap:10px;margin-top:6px}
+.mbtn-p{flex:1;padding:11px;background:var(--ink);color:#fff;border:none;border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:opacity .15s}
+.mbtn-p:hover{opacity:.82}
+.mbtn-s{padding:11px 18px;background:transparent;color:var(--muted);border:1px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:14px;cursor:pointer}
+.mnote{font-size:12px;color:var(--hint);margin-top:16px;line-height:1.65;background:var(--slate-l);padding:10px 14px;border-radius:8px}
+.mnote code{font-family:monospace;background:var(--slate-m);padding:1px 5px;border-radius:4px;font-size:11px}
+.msteps{margin-top:14px;padding-left:0;list-style:none;display:flex;flex-direction:column;gap:8px}
+.msteps li{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--muted);line-height:1.5}
+.mstep-n{width:20px;height:20px;background:var(--ink);color:#fff;border-radius:50%;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
 
-        .source-btn {
-            background: #f8f9fa;
-            border: 1px solid #dadce0;
-            padding: 5px 12px;
-            border-radius: 6px;
-            color: var(--accent);
-            text-decoration: none;
-        }
-
-        .tabs {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
-            overflow-x: auto;
-            padding-bottom: 10px;
-        }
-
-        .tab {
-            padding: 8px 16px;
-            white-space: nowrap;
-            cursor: pointer;
-            border-radius: 20px;
-            background: white;
-            border: 1px solid #ddd;
-        }
-
-        .tab.active { background: var(--accent); color: white; border-color: var(--accent); }
-
-        .news-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        @media (max-width: 600px) {
-            h1 { font-size: 1.8rem; }
-            .controls { flex-wrap: wrap; }
-        }
-    </style>
+@media(max-width:960px){.lay{grid-template-columns:1fr}.side{position:static}.t3{grid-template-columns:1fr;grid-template-rows:auto}.t3>:first-child{grid-row:auto}.hdr-mid{display:none}}
+@media(max-width:620px){.main{padding:18px 14px}.ngrid{grid-template-columns:1fr}.hdr-in{padding:0 14px}.hdr-btns{gap:5px}.ibtn span{display:none}.ibtn{padding:7px 9px}.ibtn-gear{display:none}}
+</style>
 </head>
 <body>
 
-<header>
-    <h1>Breaking News</h1>
-    <div class="meta-info" id="timeInfo">
-        最後同步：正在讀取... | 最後更新：正在讀取...
+<!-- BOOT -->
+<div id="boot">
+  <div class="b-logo"><div class="b-logo-dot"></div>BREAKING<em>NEWS</em></div>
+  <div class="b-wrap">
+    <div class="b-track"><div class="b-fill" id="bfill"></div></div>
+    <div class="b-msg" id="bmsg">初始化…</div>
+  </div>
+  <div class="b-steps">
+    <div class="b-step" id="bs1"><div class="b-step-ico">○</div>讀取快取</div>
+    <div class="b-step" id="bs2"><div class="b-step-ico">○</div>同步資料</div>
+    <div class="b-step" id="bs3"><div class="b-step-ico">○</div>渲染頁面</div>
+  </div>
+</div>
+
+<!-- SETUP MODAL -->
+<div class="modal-bg" id="setupModal">
+  <div class="modal">
+    <h2>⚙️ 連接 Google Sheet</h2>
+    <p class="modal-sub">貼上 Google Apps Script Web App URL，網頁將透過它讀寫新聞快取與呼叫 AI。</p>
+    <div class="mfield">
+      <label>Apps Script Web App URL</label>
+      <input type="url" id="gasInput" placeholder="https://script.google.com/macros/s/…/exec" autocomplete="off"/>
     </div>
-    <div class="controls">
-        <button class="btn-reload" onclick="refreshData('Reload')">Refresh (Cache)</button>
-        <button class="btn-quick" onclick="refreshData('Quick')">Quick Refresh (+5)</button>
-        <button class="btn-full" onclick="refreshData('Full')">Full Refresh (Top 20)</button>
+    <div class="mactions">
+      <button class="mbtn-p" onclick="saveGas()">儲存並連接</button>
+      <button class="mbtn-s" onclick="closeModal()">略過</button>
     </div>
+    <div class="mnote">
+      <strong>尚未設定？請依步驟操作：</strong>
+      <ol class="msteps">
+        <li><div class="mstep-n">1</div>開啟 Google Sheet → 擴充功能 → Apps Script</li>
+        <li><div class="mstep-n">2</div>貼入 <code>apps-script.gs</code> 內容，填入 Anthropic API Key</li>
+        <li><div class="mstep-n">3</div>部署 → 新增部署 → Web 應用程式<br>執行身分：<code>我</code>，存取：<code>所有人</code></li>
+        <li><div class="mstep-n">4</div>複製 Web App URL 貼入上方欄位</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-in">
+    <a class="logo" href="#"><div class="logo-dot"></div><div class="logo-txt">BREAKING<em>NEWS</em></div></a>
+    <div class="hdr-mid">
+      <div class="mpill" id="mpUpd" style="display:none">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><circle cx="5" cy="5" r="4" stroke="#94A3B8" stroke-width="1.2"/><path d="M5 2.5V5l1.5 1.5" stroke="#94A3B8" stroke-width="1.2" stroke-linecap="round"/></svg>
+        最後更新 <strong id="txtUpd">—</strong>
+      </div>
+      <div class="mpill" id="mpSync" style="display:none">
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M8.5 5A3.5 3.5 0 1 1 5 1.5" stroke="#94A3B8" stroke-width="1.2" stroke-linecap="round"/><path d="M6.5 1.5h2v2" stroke="#94A3B8" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        最後同步 <strong id="txtSync">—</strong>
+      </div>
+    </div>
+    <div class="hdr-btns">
+      <!-- Reload -->
+      <button class="ibtn ibtn-reload" id="btnR" onclick="doReload()" title="從 Google Sheet 讀取快取（不呼叫 AI）">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-5.1"/></svg>
+        <span>Reload</span>
+      </button>
+      <div class="vdiv"></div>
+      <!-- Quick -->
+      <button class="ibtn ibtn-quick" id="btnQ" onclick="doRefresh('quick')" title="補入最新5則（呼叫 AI API）">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+        <span>Quick</span>
+      </button>
+      <!-- Full -->
+      <button class="ibtn ibtn-full" id="btnF" onclick="doRefresh('full')" title="重抓全部20則（呼叫 AI API）">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+        <span>Full</span>
+      </button>
+      <div class="vdiv"></div>
+      <!-- Settings -->
+      <button class="ibtn ibtn-gear" onclick="openModal()" title="設定 Google Sheet">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:16px;height:16px"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </div>
 </header>
 
-<div class="tabs" id="categoryTabs">
-    <div class="tab active" onclick="filterCategory('All')">🔥 熱門</div>
-    <div class="tab" onclick="filterCategory('Geo')">🌍 Geo</div>
-    <div class="tab" onclick="filterCategory('Economy')">💰 Economy</div>
-    <div class="tab" onclick="filterCategory('Conflict')">⚔️ Conflict</div>
-    <div class="tab" onclick="filterCategory('Tech')">🧠 Tech</div>
-</div>
+<!-- MAIN -->
+<main class="main" id="main" style="display:none">
+  <div class="sync-banner" id="syncBanner">
+    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2" stroke-linecap="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+    <span id="syncMsg">已載入快取</span>
+  </div>
 
-<div class="news-grid" id="newsContainer">
-    <!-- News Cards will be injected here -->
-</div>
+  <div class="tbar" id="tbar"><span class="tbar-lbl">熱門主題</span></div>
+
+  <div>
+    <div class="slbl">👑 今日重點 — Top 3 Headlines</div>
+    <div class="t3" id="t3grid"></div>
+  </div>
+
+  <div class="lay">
+    <div>
+      <div class="tbwrap">
+        <div class="tabs">
+          <button class="tab on" data-c="all" onclick="sw(this,'all')">🌐 全部 <span class="tcnt" id="ca">—</span></button>
+          <button class="tab" data-c="geo" onclick="sw(this,'geo')">🌍 Geo <span class="tcnt" id="cg">—</span></button>
+          <button class="tab" data-c="econ" onclick="sw(this,'econ')">💰 Economy <span class="tcnt" id="ce">—</span></button>
+          <button class="tab" data-c="conflict" onclick="sw(this,'conflict')">⚔️ Conflict <span class="tcnt" id="cc">—</span></button>
+          <button class="tab" data-c="tech" onclick="sw(this,'tech')">🧠 Tech/AI <span class="tcnt" id="ct">—</span></button>
+          <button class="tab" data-c="macro" onclick="sw(this,'macro')">📊 Macro <span class="tcnt" id="cm">—</span></button>
+        </div>
+      </div>
+      <div class="ngrid" id="ngrid"></div>
+    </div>
+    <aside class="side">
+      <div class="sc"><div class="sc-tit">📈 7天延續議題</div><div id="trends-body"></div></div>
+      <div class="sc"><div class="sc-tit">🏷 主題標籤</div><div class="tcloud" id="tcloud"></div></div>
+    </aside>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
 
 <script>
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzkGok-7X7Fzf3jyFHU96nIqc015pO09IF-ZZEdffDPH2p5lUIeEzYXW_ZT-VsWZX9WDw/exec';
+/* ═══ CONSTANTS ═══ */
+const LS = { GAS:'bn_gas', NEWS:'bn_news', UPD:'bn_upd', SYNC:'bn_sync' };
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-    async function refreshData(mode) {
-        document.getElementById('newsContainer').innerHTML = '<p style="text-align:center; width:100%;">同步中，請稍候...</p>';
-        
-        try {
-            const response = await fetch(`${SCRIPT_URL}?mode=${mode}`);
-            const data = await response.json();
-            renderNews(data.news);
-            document.getElementById('timeInfo').innerText = `最後同步：${data.lastSync} | 最後更新：${data.lastUpdate}`;
-        } catch (e) {
-            console.error(e);
-            alert('無法獲取資料，請確認 Web App URL 是否正確並已發佈為「任何人」。');
-        }
+/* ═══ STATE ═══ */
+let NEWS = [], CAT = 'all', ATAG = null;
+
+/* ═══ STORAGE HELPERS ═══ */
+function getGas() { return localStorage.getItem(LS.GAS) || ''; }
+function saveGas() {
+  const v = document.getElementById('gasInput').value.trim();
+  if (!v.includes('script.google.com')) { toast('⚠️ URL 格式不正確'); return; }
+  localStorage.setItem(LS.GAS, v);
+  closeModal();
+  toast('✅ 已儲存，重新載入資料…');
+  doReload();
+}
+function openModal() { document.getElementById('gasInput').value = getGas(); document.getElementById('setupModal').classList.add('open'); }
+function closeModal() { document.getElementById('setupModal').classList.remove('open'); }
+
+/* ═══ TIME UTILS ═══ */
+function nowStr() {
+  const d = new Date(), p = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())} ${p(d.getHours())}:${p(d.getMinutes())}`;
+}
+function setUpd(t) {
+  const s = t || nowStr();
+  localStorage.setItem(LS.UPD, s);
+  document.getElementById('txtUpd').textContent = s;
+  document.getElementById('mpUpd').style.display = '';
+}
+function setSync(t) {
+  if (!t) return;
+  localStorage.setItem(LS.SYNC, t);
+  document.getElementById('txtSync').textContent = t;
+  document.getElementById('mpSync').style.display = '';
+}
+
+/* ═══ TOAST / BANNER ═══ */
+function toast(msg, ms=3000) {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.classList.add('show');
+  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), ms);
+}
+function banner(msg) {
+  document.getElementById('syncMsg').textContent = msg;
+  const b = document.getElementById('syncBanner'); b.classList.add('show');
+  setTimeout(() => b.classList.remove('show'), 4500);
+}
+
+/* ═══ RENDER ═══ */
+const CM = {
+  geo:{bg:'#EFF6FF',c:'#1D4ED8',l:'🌍 Geo'},
+  econ:{bg:'#FFFBEB',c:'#B45309',l:'💰 Economy'},
+  conflict:{bg:'#FEF2F2',c:'#991B1B',l:'⚔️ Conflict'},
+  tech:{bg:'#F5F3FF',c:'#6D28D9',l:'🧠 Tech/AI'},
+  macro:{bg:'#ECFDF5',c:'#065F46',l:'📊 Macro'},
+};
+const catTag = c => { const m=CM[c]||{bg:'#F1F5F9',c:'#475569',l:'📰 News'}; return `<span class="cat-tag" style="background:${m.bg};color:${m.c}">${m.l}</span>`; };
+const ibadge = i => i==='high'?'<span class="ibadge i-hi">🔴 高影響</span>':i==='mid'?'<span class="ibadge i-md">🟡 中影響</span>':'<span class="ibadge i-lo">⚪ 低影響</span>';
+
+function card(n, hero=false) {
+  return `<div class="card${hero?' hero':''}">
+    <div class="chdr"><div class="ctit">${n.title_en||n.title||''}</div>${ibadge(n.impact)}</div>
+    <p class="csum">${n.summary_zh||''}</p>
+    <div class="cwhy"><div class="cwhy-lbl">Why it matters</div><div class="cwhy-txt">${n.why_zh||''}</div></div>
+    <div class="cftr">
+      <div class="cmeta"><span class="src-tag">${n.source||''}</span>${catTag(n.cat)}<span class="pub-t">🕐 ${n.time||''}</span></div>
+      <a class="src-btn" href="${n.sourceUrl||'#'}" target="_blank" rel="noopener">Source <svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 11L11 1M11 1H5M11 1v6"/></svg></a>
+    </div>
+  </div>`;
+}
+function skCard(h=false) {
+  return `<div class="sk-card${h?' card hero':''}"><div class="sk sk-h1"></div><div class="sk sk-h2"></div><div class="sk sk-l"></div><div class="sk sk-l"></div><div class="sk sk-ls"></div><div class="sk sk-b"></div></div>`;
+}
+
+function filtered() {
+  let l = NEWS;
+  if (ATAG) l = l.filter(n=>(n.tags||[]).includes(ATAG));
+  if (CAT!=='all') l = l.filter(n=>n.cat===CAT);
+  return l;
+}
+function counts() {
+  document.getElementById('ca').textContent = NEWS.length;
+  [['g','geo'],['e','econ'],['c','conflict'],['t','tech'],['m','macro']].forEach(([k,v])=>{
+    const el=document.getElementById('c'+k); if(el) el.textContent=NEWS.filter(n=>n.cat===v).length;
+  });
+}
+function renderTop3() {
+  const t = NEWS.filter(n=>n.top3).slice(0,3);
+  document.getElementById('t3grid').innerHTML = t.length
+    ? t.map((n,i)=>card(n,i===0)).join('') : [skCard(true),skCard(),skCard()].join('');
+}
+function renderGrid() {
+  const g = document.getElementById('ngrid'), l = filtered();
+  if (!l.length) {
+    g.innerHTML = `<div class="state-box"><div class="ico">🔍</div><h3>此分類暫無新聞</h3><p>試試切換頁籤或清除標籤篩選</p></div>`;
+    return;
+  }
+  g.innerHTML = l.map(n=>card(n)).join('');
+}
+function renderTbar() {
+  const f={};NEWS.forEach(n=>(n.tags||[]).forEach(t=>{f[t]=(f[t]||0)+1}));
+  const top=Object.entries(f).sort((a,b)=>b[1]-a[1]).slice(0,7);
+  const cls=['c-r','c-a','c-b','c-p','c-g','c-o','c-a'];
+  const emo=['🔴','💰','🤖','🚀','📊','⚖️','🌊'];
+  document.getElementById('tbar').innerHTML='<span class="tbar-lbl">熱門主題</span>'+
+    top.map(([t],i)=>`<span class="ttag ${cls[i%cls.length]}${ATAG===t?' active':''}" onclick="ftag('${t}')">${emo[i]} ${t}</span>`).join('');
+}
+function renderTags() {
+  const f={};NEWS.forEach(n=>(n.tags||[]).forEach(t=>{f[t]=(f[t]||0)+1}));
+  const top=Object.entries(f).sort((a,b)=>b[1]-a[1]).slice(0,14);
+  const cls=['c-r','c-b','c-a','c-p','c-g','c-o'];
+  document.getElementById('tcloud').innerHTML=
+    top.map(([t],i)=>`<span class="tpill ${cls[i%cls.length]}${ATAG===t?' active':''}" onclick="ftag('${t}')">${t}</span>`).join('');
+}
+function renderTrends() {
+  const D=[
+    {i:'🔥',t:'中東衝突持續升溫',d:'霍爾木茲封鎖持續，談判陷僵局'},
+    {i:'📉',t:'全球增長遭下修',d:'IMF警告能源衝擊拖累2026年GDP'},
+    {i:'🤖',t:'AI軍備競賽加速',d:'美中差距縮小，模型性能競爭激烈'},
+    {i:'🚀',t:'北韓接連飛彈測試',d:'宣稱無限擴大核武庫，亞太升溫'},
+    {i:'⚖️',t:'貿易戰重塑供應鏈',d:'美中貿易跌30%，東協從中受益'},
+  ];
+  document.getElementById('trends-body').innerHTML=
+    D.map(d=>`<div class="tri"><span class="tri-ico">${d.i}</span><div class="tri-body"><strong>${d.t}</strong>${d.d}</div></div>`).join('');
+}
+function renderAll() { renderTop3();renderGrid();renderTbar();renderTags();counts(); }
+
+/* ═══ TAB / TAG ═══ */
+function sw(btn,c) { document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on')); btn.classList.add('on'); CAT=c; renderGrid(); }
+function ftag(t) { ATAG=(ATAG===t)?null:t; CAT='all'; document.querySelectorAll('.tab').forEach(x=>x.classList.remove('on')); document.querySelector('[data-c="all"]').classList.add('on'); renderGrid();renderTags();renderTbar(); }
+
+/* ═══ DISABLE/ENABLE ALL BUTTONS ═══ */
+function lockBtns(v) { ['btnR','btnQ','btnF'].forEach(id=>{ document.getElementById(id).disabled=v; }); }
+function setSpinning(id, v) { document.getElementById(id).querySelector('svg').classList.toggle('spinning',v); }
+
+/* ═══ BOOT STEP ═══ */
+function bstep(n, msg, pct) {
+  ['bs1','bs2','bs3'].forEach((id,i)=>{
+    const el=document.getElementById(id), ico=el.querySelector('.b-step-ico');
+    el.className='b-step'+(i<n-1?' ok':i===n-1?' on':'');
+    ico.textContent = i<n-1?'✓':i===n-1?'●':'○';
+  });
+  document.getElementById('bmsg').textContent=msg;
+  document.getElementById('bfill').style.width=pct+'%';
+}
+
+/* ═══ GOOGLE APPS SCRIPT CALLS ═══ */
+async function gasRead() {
+  const url = getGas(); if(!url) return null;
+  try {
+    const r = await fetch(`${url}?action=read`);
+    if (!r.ok) throw new Error('HTTP '+r.status);
+    return await r.json();
+  } catch(e) { console.warn('gasRead error:', e); return null; }
+}
+
+async function gasFetchNews(mode, existTitles=null) {
+  const url = getGas();
+  if (!url) throw new Error('尚未設定 Apps Script URL，請點 ⚙️ 設定');
+  const r = await fetch(url, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ action:'fetch_news', mode, existTitles })
+  });
+  if (!r.ok) throw new Error('GAS HTTP '+r.status);
+  const d = await r.json();
+  if (!d.ok) throw new Error(d.error || 'GAS returned error');
+  return d;
+}
+
+/* ═══ BOOT ═══ */
+async function boot() {
+  bstep(1,'檢查本地快取…', 15);
+  await sleep(180);
+
+  // Restore meta display
+  const su = localStorage.getItem(LS.UPD), ss = localStorage.getItem(LS.SYNC);
+  if (su) { document.getElementById('txtUpd').textContent=su; document.getElementById('mpUpd').style.display=''; }
+  if (ss) { document.getElementById('txtSync').textContent=ss; document.getElementById('mpSync').style.display=''; }
+
+  const gasUrl = getGas();
+
+  if (!gasUrl) {
+    // No GAS configured — check local cache
+    bstep(2,'未設定 Google Sheet，讀本地快取…', 55);
+    await sleep(200);
+    const local = localStorage.getItem(LS.NEWS);
+    if (local) {
+      NEWS = JSON.parse(local);
+      bstep(3,'渲染頁面…', 88);
+      await sleep(150);
+      finishBoot();
+      toast('ℹ️ 請點 ⚙️ 設定 Google Sheet 以啟用完整功能');
+      setTimeout(openModal, 1200);
+    } else {
+      bstep(3,'等待設定…', 88);
+      await sleep(150);
+      finishBoot();
+      // Show empty state with prompt
+      document.getElementById('ngrid').innerHTML=`<div class="state-box">
+        <div class="ico">⚙️</div>
+        <h3>尚未設定 Google Sheet</h3>
+        <p>請先設定 Apps Script URL，才能載入新聞</p>
+        <button class="state-btn" onclick="openModal()">立即設定 →</button>
+      </div>`;
+      document.getElementById('t3grid').innerHTML=[skCard(true),skCard(),skCard()].join('');
+    }
+    return;
+  }
+
+  // Has GAS URL — try to read cache
+  bstep(2,'讀取 Google Sheet 快取…', 50);
+  const sheet = await gasRead();
+
+  if (sheet && sheet.ok && sheet.data && sheet.data.length > 0) {
+    NEWS = sheet.data;
+    localStorage.setItem(LS.NEWS, JSON.stringify(NEWS));
+    setSync(sheet.syncedAt);
+    bstep(3,'渲染頁面…', 88);
+    await sleep(150);
+    finishBoot();
+    banner(`✅ 已從 Google Sheet 載入 ${NEWS.length} 則新聞`);
+  } else {
+    // Cache empty — auto full refresh
+    bstep(3,'快取為空，抓取新聞…', 88);
+    await sleep(150);
+    finishBoot(true);
+  }
+}
+
+function finishBoot(autoFetch=false) {
+  document.getElementById('bfill').style.width='100%';
+  const b = document.getElementById('boot'); b.classList.add('out');
+  document.getElementById('main').style.display='';
+  setTimeout(()=>b.remove(), 560);
+  renderAll(); renderTrends();
+  if (autoFetch) setTimeout(()=>doRefresh('full'), 500);
+}
+
+/* ═══ RELOAD — only reads Google Sheet ═══ */
+async function doReload() {
+  const gasUrl = getGas();
+  if (!gasUrl) { openModal(); return; }
+  lockBtns(true); setSpinning('btnR', true);
+  toast('🔄 從 Google Sheet 讀取快取…', 99999);
+  const sheet = await gasRead();
+  if (sheet && sheet.ok && sheet.data && sheet.data.length > 0) {
+    NEWS = sheet.data;
+    localStorage.setItem(LS.NEWS, JSON.stringify(NEWS));
+    setSync(sheet.syncedAt);
+    renderAll();
+    toast(`✅ 已載入 ${NEWS.length} 則新聞（快取）`);
+    banner(`Reload 完成，共 ${NEWS.length} 則`);
+  } else {
+    toast('⚠️ Sheet 無資料，請先執行 Full refresh');
+  }
+  lockBtns(false); setSpinning('btnR', false);
+}
+
+/* ═══ REFRESH — calls AI via GAS ═══ */
+async function doRefresh(mode) {
+  const gasUrl = getGas();
+  if (!gasUrl) { openModal(); return; }
+
+  lockBtns(true);
+  const activeBtn = mode==='quick' ? 'btnQ' : 'btnF';
+  setSpinning(activeBtn, true);
+
+  if (mode==='full') {
+    document.getElementById('t3grid').innerHTML=[skCard(true),skCard(),skCard()].join('');
+    document.getElementById('ngrid').innerHTML=Array(6).fill(skCard()).join('');
+    toast('🔁 Full Refresh：AI 重抓全部新聞中…', 99999);
+  } else {
+    toast('⚡ Quick Refresh：AI 搜尋最新頭條…', 99999);
+  }
+
+  try {
+    const existTitles = mode==='quick' ? NEWS.map(n=>n.title_en||n.title||'').join('\n') : null;
+    const res = await gasFetchNews(mode, existTitles);
+    const fresh = res.data;
+
+    if (mode==='full') {
+      NEWS = fresh.map((n,i)=>({...n,id:i+1}));
+      toast(`✅ 已更新 ${NEWS.length} 則頭條`);
+    } else {
+      const exist = new Set(NEWS.map(n=>(n.title_en||n.title||'').toLowerCase()));
+      const nw = fresh.filter(n=>!exist.has((n.title_en||n.title||'').toLowerCase()));
+      if (nw.length) {
+        const mx = Math.max(...NEWS.map(n=>n.id||0), 0);
+        NEWS = [...nw.map((n,i)=>({...n,id:mx+i+1,top3:false,hero:false})), ...NEWS].slice(0,25);
+        toast(`✅ 新增 ${nw.length} 則新聞`);
+      } else {
+        toast('✅ 已是最新，無新頭條');
+      }
     }
 
-    function renderNews(newsList) {
-        const container = document.getElementById('newsContainer');
-        container.innerHTML = '';
+    const now = nowStr();
+    setUpd(now); setSync(res.syncedAt || now);
+    localStorage.setItem(LS.NEWS, JSON.stringify(NEWS));
+    renderAll();
+    banner(`同步完成，共 ${NEWS.length} 則新聞已寫入 Google Sheet`);
 
-        newsList.forEach(item => {
-            const card = document.createElement('div');
-            card.className = 'card';
-            const impactClass = item.impact === '高' ? 'high' : (item.impact === '中' ? 'mid' : 'low');
-            
-            card.innerHTML = `
-                <span class="impact-badge ${impactClass}">${item.impact}影響</span>
-                <div class="title">${item.title}</div>
-                <div class="summary">${item.summary}</div>
-                <div class="why-it-matters"><strong>Why it matters:</strong> ${item.whyMatters}</div>
-                <div class="card-footer">
-                    <span>${item.source} • ${item.time}</span>
-                    <a href="${item.url}" target="_blank" class="source-btn">Source</a>
-                </div>
-            `;
-            container.appendChild(card);
-        });
-    }
+  } catch(e) {
+    console.error(e);
+    toast('⚠️ ' + (e.message||'更新失敗'));
+    renderAll();
+  }
 
-    // Initial load
-    window.onload = () => refreshData('Reload');
+  lockBtns(false); setSpinning(activeBtn, false);
+}
+
+/* ═══ INIT ═══ */
+boot();
 </script>
 </body>
 </html>
